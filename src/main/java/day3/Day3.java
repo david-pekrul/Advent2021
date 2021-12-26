@@ -1,5 +1,8 @@
-import java.sql.Array;
-import java.util.*;
+package main.java.day3;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
