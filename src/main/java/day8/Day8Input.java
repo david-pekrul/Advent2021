@@ -1,6 +1,5 @@
-package main.java.Day8;
+package main.java.day8;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Day8Input {

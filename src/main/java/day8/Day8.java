@@ -1,8 +1,6 @@
-package main.java.Day8;
+package main.java.day8;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collector;
 
 public class Day8 {
     public static void main(String[] args) {
