@@ -1,6 +1,7 @@
 package day9;
 
 import java.util.List;
+import java.util.Set;
 
 public class Day9 {
     public static void main(String[] args) {
@@ -10,6 +11,12 @@ public class Day9 {
 
         int answer1 = lowPoints.stream().map(x -> x.height+1).reduce(Integer::sum).get();
         System.out.println("Answer 1: " + answer1);
+
+        List<Set<Cell>> basins = heightMap.getBasins();
+
+        basins.sort((a,b) -> -1*Integer.compare(a.size(),b.size()));
+        int answer2 = basins.get(0).size() * basins.get(1).size() * basins.get(2).size();
+        System.out.println("Answer 2: " + answer2);
     }
 
     static String testInput = """
