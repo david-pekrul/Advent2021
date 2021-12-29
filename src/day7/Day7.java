@@ -1,4 +1,4 @@
-package main.java.day7;
+package day7;
 
 import java.util.Arrays;
 import java.util.List;
