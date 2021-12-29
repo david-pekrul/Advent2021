@@ -1,4 +1,4 @@
-package main.java.day4;
+package day4;
 
 import java.util.*;
 

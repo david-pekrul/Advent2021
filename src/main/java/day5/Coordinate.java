@@ -1,4 +1,4 @@
-package main.java.day5;
+package day5;
 
 import java.util.Objects;
 
