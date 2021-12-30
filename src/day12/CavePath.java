@@ -6,8 +6,7 @@ public class CavePath {
     public Queue<Cave> path;
     public Cave lastCave;
     boolean part2;
-
-    Map<Cave, Integer> caveCount;
+    Optional<Cave> doubledSmallCave;
 
     public CavePath(Cave start, boolean part2) {
         if (!start.isStart()) {
@@ -17,17 +16,15 @@ public class CavePath {
         path.add(start);
         lastCave = start;
         this.part2 = part2;
-        caveCount = new HashMap<>();
+        doubledSmallCave = Optional.empty();
     }
 
-    private CavePath(Queue<Cave> p, Cave l, Map<Cave, Integer> m, Cave next, boolean part2) {
+    private CavePath(Queue<Cave> p, Cave l, Cave next, boolean part2, Optional<Cave> dupeCave) {
         this.path = new LinkedList(p);
         this.lastCave = l;
-        this.caveCount = new HashMap<>(m);
         this.path.add(next);
         this.lastCave = next;
-        int v = this.caveCount.getOrDefault(next, 0);
-        this.caveCount.put(next, v + 1);
+        this.doubledSmallCave = dupeCave;
         this.part2 = part2;
     }
 
@@ -35,35 +32,55 @@ public class CavePath {
         return lastCave.isEnd();
     }
 
-    public Optional<CavePath> addCave(Cave next) {
-//        if (!next.isBigCave && path.contains(next)) {
-//            return Optional.empty();
-//        }
-        if (next.isSmallCave && path.contains(next)) {
-            if (!part2 && path.contains(next)) {
-                return Optional.empty();
-            } else if (next.isStart()) {
-                return Optional.empty();
-            } else {
-                //for part 2, only one small cave can be visited twice
-                //has a small cave already been visited twice?
-                boolean alreadyDoubled = caveCount.values().contains(2);
-                if(alreadyDoubled){
-                    return Optional.empty();
-                }
-                int currentVisitCount = caveCount.getOrDefault(next, 0);
-                if (currentVisitCount > 1) {
-                    return Optional.empty();
-                }
-            }
+    public List<CavePath> addCave(Cave next) {
+
+        if (next.isStart()) {
+            //We cannot add the start cave in the middle of a path.
+            return List.of();
         }
 
-        CavePath forked = fork(next);
-        return Optional.of(forked);
+        if (next.isBigCave) {
+            //These are always allowed
+            return List.of(fork(next, false));
+        }
+
+
+        if (!part2 && path.contains(next)) {
+            //This is part 1 that does not allow duplicates of small caves.
+            //the path already contains the small cave, so we cannot add it.
+            return List.of();
+        }
+
+        if(!part2){
+            return List.of(fork(next, false));
+        }
+
+        if (path.contains(next)) {
+            if (doubledSmallCave.isEmpty()) {
+                //this path does not have a duplicated small cave yet.
+                //this needs to return the option with the current path being duplicated
+                CavePath forkedWithDuplicate = fork(next, true); //does set this small cave as teh duplicate
+                return List.of(forkedWithDuplicate);
+            }
+            //cannot add next cave.
+            //It is a small cave, and the single duplicated cave has already been used.
+            return List.of();
+        }
+
+
+        //duplicate has already been used
+        //Can only add the next cave if the path does not already contain this nexts small cave
+        return List.of(fork(next, false));
+
     }
 
-    private CavePath fork(Cave next) {
-        return new CavePath(this.path, this.lastCave, this.caveCount, next, part2);
+    private CavePath fork(Cave next, boolean allowDupliate) {
+        Optional<Cave> dupeCave = this.doubledSmallCave;
+        if (allowDupliate) {
+            assert(dupeCave.isEmpty() == true);
+            dupeCave = Optional.of(next);
+        }
+        return new CavePath(this.path, this.lastCave, next, part2, dupeCave);
     }
 
 

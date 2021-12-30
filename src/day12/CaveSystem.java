@@ -19,15 +19,13 @@ public class CaveSystem {
         stack.push(startPath);
         while (!stack.isEmpty()) {
             CavePath current = stack.pop();
-            if(current.isDone()){
+            if (current.isDone()) {
                 allPaths.add(current);
                 continue;
             }
-            for(Cave neighbor : current.lastCave.neighbors){
-                Optional<CavePath> nextPathOpt = current.addCave(neighbor);
-                if(nextPathOpt.isPresent()){
-                    stack.push(nextPathOpt.get());
-                }
+            for (Cave neighbor : current.lastCave.neighbors) {
+                List<CavePath> nextPaths = current.addCave(neighbor);
+                stack.addAll(nextPaths);
             }
         }
         return allPaths;

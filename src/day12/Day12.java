@@ -7,31 +7,12 @@ import java.util.Set;
 public class Day12 {
     public static void main(String[] args) {
 
-        CaveSystem caveSystem = new CaveSystem.Builder().setInput(test1).build();
+        CaveSystem caveSystem = new CaveSystem.Builder().setInput(realInput).build();
 
         Set<CavePath> paths = caveSystem.getAllPaths(false);
         System.out.println("Answer 1: " + paths.size());
 
         Set<CavePath> paths2 = caveSystem.getAllPaths(true);
-
-        paths2.stream().map(x -> x.toRawString()).sorted().forEach(System.out::println);
-
-        Set<String> part2TestAnswer = getPart2Test();
-        Set<String> paths2Strings = new HashSet<>();
-        for(CavePath p : paths2){
-//            paths2Strings.add(p.toRawString());
-        }
-
-        for(String p : paths2Strings){
-            if(!part2TestAnswer.contains(p)){
-                System.out.println("EXTRA: " + p);
-            }
-        }
-        for(String p : part2TestAnswer){
-            if(!paths2Strings.contains(p)){
-                System.out.println("MISSING: " + p);
-            }
-        }
 
         System.out.println("Answer 2: " + paths2.size());
 
