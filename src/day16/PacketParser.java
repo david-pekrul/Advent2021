@@ -94,7 +94,7 @@ public class PacketParser {
     public static String takeNBits(LinkedList<Character> bits, int n){
         StringBuilder sb = new StringBuilder();
         for(int i = 0; i < n; i++) {
-            sb.append(bits.removeFirst());
+            sb.append(bits.pop());
         }
         return sb.toString();
     }
@@ -109,7 +109,7 @@ public class PacketParser {
 
     public static int parseLiteral(LinkedList<Character> bits){
         StringBuilder sb = new StringBuilder();
-        while(bits.pop().equals("1")){
+        while(bits.pop().equals('1')){
             for(int i = 0; i < 4; i++){
                 sb.append(bits.pop());
             }
