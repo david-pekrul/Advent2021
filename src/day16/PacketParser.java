@@ -1,14 +1,14 @@
 package day16;
 
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class PacketParser {
 
     static final Map<String, String> hexToBinary = new HashMap<>();
-    static final Map<Integer, String> typeIdToOperator = new HashMap<>();
-    static final Map<Integer, IntegerOps> thing = new HashMap<>();
+    static final Packet.Factory packetFactory = new Packet.Factory();
 
 
     static {
@@ -29,35 +29,9 @@ public class PacketParser {
         hexToBinary.put("E", "1110");
         hexToBinary.put("F", "1111");
 
-        typeIdToOperator.put(0, "+");
-        typeIdToOperator.put(1, "*");
-        typeIdToOperator.put(2, "min");
-        typeIdToOperator.put(3, "max");
-        typeIdToOperator.put(5, ">");
-        typeIdToOperator.put(6, "<");
-        typeIdToOperator.put(7, "==");
-
-        thing.put(0, (a, b) -> a + b);
-        thing.put(1, (a, b) -> a * b);
-        thing.put(2, (a, b) -> Math.min(a, b));
-        thing.put(3, (a, b) -> Math.max(a, b));
-        thing.put(5, (a, b) -> a > b ? 1 : 0);
-        thing.put(6, (a, b) -> a < b ? 1 : 0);
-        thing.put(7, (a, b) -> a == b ? 1 : 0);
-
 
     }
 
-    public interface IntegerOps {
-        int apply(int a, int b);
-    }
-
-
-    public PacketParser() {
-        int a = 3;
-        int b = 5;
-        thing.get(0).apply(a,b);
-    }
 
     public static Packet parse(String rawInput) {
         StringBuilder sb = new StringBuilder();
@@ -67,7 +41,7 @@ public class PacketParser {
 
         String rawBinary = sb.toString();
 
-        LinkedList<Character> bits = new LinkedList<Character>();
+        LinkedList<Character> bits = new LinkedList<>();
         for (char c : rawBinary.toCharArray()) {
             bits.add(c);
         }
@@ -78,18 +52,18 @@ public class PacketParser {
     private static Packet parse(LinkedList<Character> remainingBits) {
         //packet always starts with 3 bits as the version
         //packet then has 3 bits as the operator
-        int version = binaryToDecimal(takeNBits(remainingBits, 3));
-        int typeId = binaryToDecimal(takeNBits(remainingBits, 3));
+        int version = (int)binaryToDecimal(takeNBits(remainingBits, 3));
+        int typeId = (int) binaryToDecimal(takeNBits(remainingBits, 3));
 
         if (typeId == 4) { //this is a literal value
-            return new Packet(version, typeId, parseLiteral(remainingBits));
+            return packetFactory.build(version,parseLiteral(remainingBits));
         }
 
         char i = remainingBits.pop();
         List<Packet> subPackets = new LinkedList<>();
 
         if (i == '0') {
-            int numberOfBitsInSubpackets = binaryToDecimal(takeNBits(remainingBits, 15));
+            int numberOfBitsInSubpackets = (int) binaryToDecimal(takeNBits(remainingBits, 15));
             LinkedList<Character> subList = createSubList(remainingBits, numberOfBitsInSubpackets);
             while (!subList.isEmpty()) {
                 subPackets.add(parse(subList));
@@ -100,18 +74,18 @@ public class PacketParser {
         } else {
             //i == 1
             //the next 11 bits are the binary for how many subpackets there are
-            int numberOfSubpackets = binaryToDecimal(takeNBits(remainingBits, 11));
+            long numberOfSubpackets = binaryToDecimal(takeNBits(remainingBits, 11));
             for (int p = 0; p < numberOfSubpackets; p++) {
                 Packet subPacket = parse(remainingBits);
                 subPackets.add(subPacket);
             }
         }
 
-        return new Packet(version, typeId, subPackets);
+        return packetFactory.build(version,typeId,subPackets);
     }
 
-    public static int binaryToDecimal(String binary) {
-        int num = 0;
+    public static long binaryToDecimal(String binary) {
+        long num = 0;
         for (int i = binary.length() - 1; i >= 0; i--) {
             if (binary.charAt(i) == '1') {
                 num += Math.pow(2, binary.length() - 1 - i);
@@ -137,7 +111,7 @@ public class PacketParser {
         return subList;
     }
 
-    public static int parseLiteral(LinkedList<Character> bits) {
+    public static long parseLiteral(LinkedList<Character> bits) {
         StringBuilder sb = new StringBuilder();
         while (bits.pop().equals('1')) {
             for (int i = 0; i < 4; i++) {
